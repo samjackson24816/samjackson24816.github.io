@@ -194,8 +194,6 @@
             // Subscribe to player changes
             subscribeToPlayers();
             
-            // Set up cleanups
-            setupPlayerCleanup();
             window.addEventListener('beforeunload', removePlayer);
         }
         
@@ -236,9 +234,9 @@
                     playerElement.style.transform = `translate(${currentX}px, ${currentY}px)`;
                 }
                 
-                // Send update to Supabase VERY frequently (every ~2ms)
+                // Send update to Supabase all the time
                 const now = Date.now();
-                if (now - lastUpdateTime > 2) {
+                if (now - lastUpdateTime > 0) {
                     lastUpdateTime = now;
                     await supabaseClient
                         .from('players')
@@ -394,22 +392,6 @@
                 }
             }
         }
-        
-        // Cleanup inactive players (those who haven't updated in the last minute)
-        function setupPlayerCleanup() {
-            setInterval(async () => {
-                const oneMinuteAgo = new Date();
-                oneMinuteAgo.setMinutes(oneMinuteAgo.getMinutes() - 1);
-                
-                try {
-                    await supabaseClient
-                        .from('players')
-                        .delete()
-                        .lt('last_updated', oneMinuteAgo.toISOString());
-                } catch (error) {
-                    console.error('Error cleaning up inactive players:', error);
-                }
-            }, 30000); // Run every 30 seconds
         }
         
         // Update the player count display
