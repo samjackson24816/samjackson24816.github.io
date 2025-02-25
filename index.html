@@ -135,6 +135,15 @@
                             last_updated: new Date().toISOString()
                         });
                     
+                    // Initialize our local player data
+                    players[currentPlayerId] = {
+                        id: currentPlayerId,
+                        name: playerName,
+                        color: playerColor,
+                        x: startX,
+                        y: startY
+                    };
+                    
                     // Hide login, show game
                     loginContainer.style.display = 'none';
                     gameContainer.style.display = 'block';
@@ -159,8 +168,11 @@
                 keysPressed[e.key] = false;
             });
             
+            // Render the current player
+            renderPlayer(players[currentPlayerId]);
+            
             // Game loop - update player position and sync with Supabase
-            setInterval(updatePlayerPosition, 50);
+            setInterval(updateCurrentPlayerPosition, 50);
             
             // Subscribe to player changes
             subscribeToPlayers();
@@ -170,13 +182,13 @@
             window.addEventListener('beforeunload', removePlayer);
         }
         
-        // Update player position based on keys pressed
-        async function updatePlayerPosition() {
-            if (!currentPlayerId) return;
+        // Update current player position based on keys pressed
+        async function updateCurrentPlayerPosition() {
+            if (!currentPlayerId || !players[currentPlayerId]) return;
             
             let playerElement = document.getElementById(currentPlayerId);
-            let currentX = players[currentPlayerId]?.x || 0;
-            let currentY = players[currentPlayerId]?.y || 0;
+            let currentX = players[currentPlayerId].x;
+            let currentY = players[currentPlayerId].y;
             let moved = false;
             
             // Update position based on keys
@@ -199,11 +211,8 @@
             
             // Only update if player moved
             if (moved) {
-                players[currentPlayerId] = {
-                    ...players[currentPlayerId],
-                    x: currentX,
-                    y: currentY
-                };
+                players[currentPlayerId].x = currentX;
+                players[currentPlayerId].y = currentY;
                 
                 // Update player element position
                 if (playerElement) {
@@ -237,8 +246,11 @@
                     }
                     
                     data.forEach(player => {
-                        players[player.id] = player;
-                        renderPlayer(player);
+                        // Don't overwrite our own player data
+                        if (player.id !== currentPlayerId) {
+                            players[player.id] = player;
+                            renderPlayer(player);
+                        }
                     });
                     
                     updatePlayerCount();
@@ -253,9 +265,11 @@
                     table: 'players'
                 }, payload => {
                     const newPlayer = payload.new;
-                    players[newPlayer.id] = newPlayer;
-                    renderPlayer(newPlayer);
-                    updatePlayerCount();
+                    if (newPlayer.id !== currentPlayerId) {
+                        players[newPlayer.id] = newPlayer;
+                        renderPlayer(newPlayer);
+                        updatePlayerCount();
+                    }
                 })
                 .on('postgres_changes', {
                     event: 'UPDATE',
@@ -263,8 +277,10 @@
                     table: 'players'
                 }, payload => {
                     const updatedPlayer = payload.new;
-                    players[updatedPlayer.id] = updatedPlayer;
-                    updatePlayerPosition(updatedPlayer);
+                    if (updatedPlayer.id !== currentPlayerId) {
+                        players[updatedPlayer.id] = updatedPlayer;
+                        updateOtherPlayerPosition(updatedPlayer);
+                    }
                 })
                 .on('postgres_changes', {
                     event: 'DELETE',
@@ -281,6 +297,8 @@
         
         // Render a player on the screen
         function renderPlayer(player) {
+            if (!player) return;
+            
             // Check if player element already exists
             let playerElement = document.getElementById(player.id);
             
@@ -304,9 +322,9 @@
             playerElement.style.transform = `translate(${player.x}px, ${player.y}px)`;
         }
         
-        // Update a player's position on the screen
-        function updatePlayerPosition(player) {
-            if (player.id === currentPlayerId) return; // Don't update our own player from Supabase
+        // Update another player's position on the screen
+        function updateOtherPlayerPosition(player) {
+            if (!player) return;
             
             const playerElement = document.getElementById(player.id);
             if (playerElement) {
@@ -341,14 +359,14 @@
         // Cleanup inactive players (those who haven't updated in the last minute)
         function setupPlayerCleanup() {
             setInterval(async () => {
-                const fiveMinutesAgo = new Date();
-                fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 1);
+                const oneMinuteAgo = new Date();
+                oneMinuteAgo.setMinutes(oneMinuteAgo.getMinutes() - 1);
                 
                 try {
                     await supabaseClient
                         .from('players')
                         .delete()
-                        .lt('last_updated', fiveMinutesAgo.toISOString());
+                        .lt('last_updated', oneMinuteAgo.toISOString());
                 } catch (error) {
                     console.error('Error cleaning up inactive players:', error);
                 }
