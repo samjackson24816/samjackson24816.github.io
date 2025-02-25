@@ -94,9 +94,9 @@
         const SPEED = 5;
         
         // Supabase setup - you'll need to replace with your own project URL and anon key
-        const supabaseUrl = 'https://mnjotgnqkdasqhycyhew.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uam90Z25xa2Rhc3FoeWN5aGV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0NDc2NjMsImV4cCI6MjA1NjAyMzY2M30.HPGw4I1aR_nlOCP8_shLBS_SCdD0ZnwMKSKjISmdkDo';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseUrl = 'https://YOUR_SUPABASE_URL.supabase.co';
+        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         
         // DOM elements
         const gameContainer = document.getElementById('game-container');
@@ -124,7 +124,7 @@
                 
                 // Create the player in Supabase
                 try {
-                    await supabase
+                    await supabaseClient
                         .from('players')
                         .insert({
                             id: currentPlayerId,
@@ -212,7 +212,7 @@
                 
                 // Send update to Supabase every few movements to reduce db load
                 if (Math.random() < 0.3) { // ~30% chance to update each movement
-                    await supabase
+                    await supabaseClient
                         .from('players')
                         .update({
                             x: currentX,
@@ -227,7 +227,7 @@
         // Subscribe to player updates from Supabase
         function subscribeToPlayers() {
             // Initial fetch of all players
-            supabase
+            supabaseClient
                 .from('players')
                 .select('*')
                 .then(({ data, error }) => {
@@ -245,7 +245,7 @@
                 });
             
             // Subscribe to real-time updates
-            const playersSubscription = supabase
+            const playersSubscription = supabaseClient
                 .channel('players-channel')
                 .on('postgres_changes', {
                     event: 'INSERT',
@@ -328,7 +328,7 @@
         async function removePlayer() {
             if (currentPlayerId) {
                 try {
-                    await supabase
+                    await supabaseClient
                         .from('players')
                         .delete()
                         .eq('id', currentPlayerId);
@@ -345,7 +345,7 @@
                 fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 1);
                 
                 try {
-                    await supabase
+                    await supabaseClient
                         .from('players')
                         .delete()
                         .lt('last_updated', fiveMinutesAgo.toISOString());
