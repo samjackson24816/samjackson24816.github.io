@@ -66,6 +66,15 @@
             padding: 5px 10px;
             border-radius: 5px;
         }
+        #debug-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -81,6 +90,7 @@
     
     <div id="game-container" style="display: none;">
         <div id="player-count">Players online: 0</div>
+        <div id="debug-info">Connection status: Not connected</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -92,10 +102,11 @@
         let players = {};
         let keysPressed = {};
         const SPEED = 5;
+        let lastUpdateTime = 0;
         
         // Supabase setup - you'll need to replace with your own project URL and anon key
-        const supabaseUrl = 'https://mnjotgnqkdasqhycyhew.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uam90Z25xa2Rhc3FoeWN5aGV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0NDc2NjMsImV4cCI6MjA1NjAyMzY2M30.HPGw4I1aR_nlOCP8_shLBS_SCdD0ZnwMKSKjISmdkDo';
+        const supabaseUrl = 'https://YOUR_SUPABASE_URL.supabase.co';
+        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         
         // DOM elements
@@ -105,6 +116,7 @@
         const playerColorInput = document.getElementById('player-color');
         const startButton = document.getElementById('start-button');
         const playerCountDisplay = document.getElementById('player-count');
+        const debugInfo = document.getElementById('debug-info');
         
         // Start game button event listener
         startButton.addEventListener('click', startGame);
@@ -115,6 +127,8 @@
             playerColor = playerColorInput.value;
             
             if (playerName) {
+                debugInfo.textContent = 'Connection status: Connecting to Supabase...';
+                
                 // Get a random start position
                 const startX = Math.floor(Math.random() * (window.innerWidth - 100)) + 50;
                 const startY = Math.floor(Math.random() * (window.innerHeight - 100)) + 50;
@@ -150,7 +164,10 @@
                     
                     // Set up game
                     setupGame();
+                    
+                    debugInfo.textContent = 'Connection status: Connected';
                 } catch (error) {
+                    debugInfo.textContent = `Connection error: ${error.message}`;
                     console.error('Error joining game:', error);
                     alert('Error joining game. Please try again.');
                 }
@@ -219,8 +236,10 @@
                     playerElement.style.transform = `translate(${currentX}px, ${currentY}px)`;
                 }
                 
-                // Send update to Supabase every few movements to reduce db load
-                if (Math.random() < 0.3) { // ~30% chance to update each movement
+                // Send update to Supabase more frequently (every ~200ms)
+                const now = Date.now();
+                if (now - lastUpdateTime > 200) {
+                    lastUpdateTime = now;
                     await supabaseClient
                         .from('players')
                         .update({
@@ -242,6 +261,7 @@
                 .then(({ data, error }) => {
                     if (error) {
                         console.error('Error fetching players:', error);
+                        debugInfo.textContent = `Error fetching players: ${error.message}`;
                         return;
                     }
                     
@@ -254,45 +274,64 @@
                     });
                     
                     updatePlayerCount();
+                    debugInfo.textContent = `Players loaded: ${data.length}`;
                 });
             
             // Subscribe to real-time updates
-            const playersSubscription = supabaseClient
-                .channel('players-channel')
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'players'
+            const channel = supabaseClient.channel('public:players');
+            
+            channel
+                .on('postgres_changes', { 
+                    event: 'INSERT', 
+                    schema: 'public', 
+                    table: 'players' 
                 }, payload => {
                     const newPlayer = payload.new;
+                    console.log('New player joined:', newPlayer);
+                    
                     if (newPlayer.id !== currentPlayerId) {
                         players[newPlayer.id] = newPlayer;
                         renderPlayer(newPlayer);
                         updatePlayerCount();
+                        debugInfo.textContent = `New player joined: ${newPlayer.name}`;
                     }
                 })
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'players'
+                .on('postgres_changes', { 
+                    event: 'UPDATE', 
+                    schema: 'public', 
+                    table: 'players' 
                 }, payload => {
                     const updatedPlayer = payload.new;
+                    console.log('Player updated:', updatedPlayer);
+                    
                     if (updatedPlayer.id !== currentPlayerId) {
                         players[updatedPlayer.id] = updatedPlayer;
                         updateOtherPlayerPosition(updatedPlayer);
+                        debugInfo.textContent = `Player moved: ${updatedPlayer.name}`;
                     }
                 })
-                .on('postgres_changes', {
-                    event: 'DELETE',
-                    schema: 'public',
-                    table: 'players'
+                .on('postgres_changes', { 
+                    event: 'DELETE', 
+                    schema: 'public', 
+                    table: 'players' 
                 }, payload => {
                     const deletedPlayerId = payload.old.id;
+                    console.log('Player left:', payload.old);
+                    
                     removePlayerElement(deletedPlayerId);
                     delete players[deletedPlayerId];
                     updatePlayerCount();
+                    debugInfo.textContent = `Player left: ${payload.old.name || deletedPlayerId}`;
                 })
-                .subscribe();
+                .subscribe(status => {
+                    console.log('Subscription status:', status);
+                    
+                    if (status === 'SUBSCRIBED') {
+                        debugInfo.textContent = 'Realtime connection established!';
+                    } else if (status === 'CHANNEL_ERROR') {
+                        debugInfo.textContent = 'Realtime connection error!';
+                    }
+                });
         }
         
         // Render a player on the screen
