@@ -236,9 +236,9 @@
                     playerElement.style.transform = `translate(${currentX}px, ${currentY}px)`;
                 }
                 
-                // Send update to Supabase more frequently (every ~200ms)
+                // Send update to Supabase VERY frequently (every ~2ms)
                 const now = Date.now();
-                if (now - lastUpdateTime > 200) {
+                if (now - lastUpdateTime > 2) {
                     lastUpdateTime = now;
                     await supabaseClient
                         .from('players')
