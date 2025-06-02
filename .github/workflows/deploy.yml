@@ -8,6 +8,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions: # <--- Add this block
+      contents: write # Allows the workflow to write to the repository
+      pages: write # Allows the workflow to deploy to GitHub Pages
 
     steps:
       - name: Checkout repository
