@@ -20,7 +20,14 @@ function buildProjectsJson() {
     let descriptionHtml = '';
     if (fs.existsSync(descriptionPath)) {
       const descriptionMarkdown = fs.readFileSync(descriptionPath, 'utf-8');
-      descriptionHtml = marked(descriptionMarkdown); // Convert markdown to HTML
+
+      // Adjust image paths in markdown to be relative to the public directory
+      const adjustedMarkdown = descriptionMarkdown.replace(/src="(.*?)"/g, (match, p1) => {
+        const adjustedPath = path.join('/Project Files', projectDir, p1);
+        return `src="${adjustedPath}"`;
+      });
+
+      descriptionHtml = marked(adjustedMarkdown); // Convert markdown to HTML
     }
 
     projects.push({

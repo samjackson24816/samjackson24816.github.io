@@ -1,54 +1,87 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+# Insperation / Ideas
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+I want to incorperate a moving logo at the top of the page that maybe uses 3 js
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+![alt text](/insperations/image.png)
+![alt text](/insperations/website-gif.gif)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+https://safetpojskic.com/
+https://www.muhammadaamirmalik.com/
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+
+
+
+# Things I want
+
+- Header page with interesting interactive thing
+  - Boids?
+- Intro to me
+- More about me
+
+- Project list
+  - List view
+  - Detail view
+  - Searchable
+
+- Each project has a set of skills attached to it.  You can search by skills
+- Skill list with brief description of how I know the skill
+- Work experience (?)
+- Resume download
+
+
+- Social links
+  - Visable from top
+
+
+
+# Outline
+
+## Menu bar
+Above everything
+
+- "Sam Jackson" top page
+- "Projects"
+- "Skills"
+- "Contact"
+
+
+## Main Page
+
+### Heading
+"Sam Jackson"
+Brief bio
+Boids animation
+
+### Projects
+Project list
+
+you can click on projects and get a detail view
+
+### Skills
+Skills list
+
+### Contact
+contact and social page
+
+
+### Detail page
+
+Same heading
+Full details of the project
+More projects at the bottom
+
+
+
+
+
+
+
+
+
+
+
