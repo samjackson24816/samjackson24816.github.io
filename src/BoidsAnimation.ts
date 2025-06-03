@@ -6,7 +6,7 @@ const COHESION_REACH = 100; // Cohesion reach distance
 
 const SPEED = 2; // Speed of boids
 const MOUSE_REPULSION = 1000; // Mouse repulsion distance
-const BOID_NUMBER = 1000; // Number of boids
+const BOID_NUMBER = 400; // Number of boids
 
 
 export function initializeBoidsAnimation(canvas: HTMLCanvasElement) {
