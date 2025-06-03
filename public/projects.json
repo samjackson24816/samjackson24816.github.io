@@ -1,12 +1,7 @@
 [
   {
-    "name": "CONTENT_EDITING_DIRECTIONS.md",
-    "description": "",
-    "coverImagePath": "images/CONTENT_EDITING_DIRECTIONS.md-Image.jpeg"
-  },
-  {
     "name": "Snake Game",
-    "description": "<h2>Hello world</h2>\n<p>how are you</p>\n<p><em>good</em></p>\n<p><strong>very good</strong></p>\n<p>look at this image: <img src=\"/Project Files/Snake Game/image.png\" alt=\"alt text\" width=\"300\" height=\"200\"></p>\n<p>look at this gif: <img src=\"/Project Files/Snake Game/Snake-Gameplay.gif\" alt=\"alt text\" width=\"300\" height=\"300\"></p>\n",
-    "coverImagePath": "images/Snake Game-Image.jpeg"
+    "description": "<p>A classic Snake game build from scratch using <a href=\"https://go.dev/\">Golang</a> and <a href=\"https://www.raylib.com/\">Raylib</a></p>\n",
+    "coverImagePath": "public/images/Snake Game-cover.jpeg"
   }
 ]

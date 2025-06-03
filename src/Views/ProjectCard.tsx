@@ -8,12 +8,12 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ name, description, coverImage }) => {
   return (
-    <div className="project-card">
+    <div className="project-card" style={{ display: 'flex', alignItems: 'center' }}>
       <img
         src={coverImage}
         alt={`${name} cover`}
         className="project-card-image"
-        style={{ width: '200px', height: '200px', objectFit: 'cover' }} // Standard size for formatting
+        style={{ width: '200px', height: '150px', objectFit: 'cover', marginRight: '1rem' }}
       />
       <div className="project-card-content">
         <h2 className="project-card-title">{name}</h2>

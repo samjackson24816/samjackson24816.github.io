@@ -7,14 +7,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const projectFilesDir = path.resolve(__dirname, 'Project Files');
+const publicImagesDir = path.resolve(__dirname, 'public/images');
 const outputFilePath = path.resolve(__dirname, 'public/projects.json');
+
+// Ensure the public/images directory exists
+if (!fs.existsSync(publicImagesDir)) {
+  fs.mkdirSync(publicImagesDir, { recursive: true });
+}
 
 function buildProjectsJson() {
   const projects = [];
 
   fs.readdirSync(projectFilesDir).forEach((projectDir) => {
     const projectPath = path.join(projectFilesDir, projectDir);
-    const coverImagePath = path.join('images', `${projectDir}-Image.jpeg`);
+    const coverImagePath = path.join(projectPath, 'cover.jpeg');
     const descriptionPath = path.join(projectPath, 'description.md');
 
     let descriptionHtml = '';
@@ -30,10 +36,16 @@ function buildProjectsJson() {
       descriptionHtml = marked(adjustedMarkdown); // Convert markdown to HTML
     }
 
+    // Copy the cover image to the public/images directory
+    const publicCoverImagePath = path.join(publicImagesDir, `${projectDir}-cover.jpeg`);
+    if (fs.existsSync(coverImagePath)) {
+      fs.copyFileSync(coverImagePath, publicCoverImagePath);
+    }
+
     projects.push({
       name: projectDir,
       description: descriptionHtml,
-      coverImagePath,
+      coverImagePath: path.relative(__dirname, publicCoverImagePath),
     });
   });
 

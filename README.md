@@ -11,6 +11,7 @@ I want to incorperate a moving logo at the top of the page that maybe uses 3 js
 
 https://safetpojskic.com/
 https://www.muhammadaamirmalik.com/
+https://safetpojskic.netlify.app/#
 
 
 

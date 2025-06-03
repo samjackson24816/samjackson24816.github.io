@@ -1,7 +1,8 @@
 import './App.css'
 import React, { useEffect, useState } from 'react';
-import ProjectCard from './ProjectCard';
-import { loadProjects, type Project } from './ProjectData';
+import ProjectCard from './Views/ProjectCard';
+import { loadProjects, type Project } from './Model/ProjectData';
+import FrontPage from './Views/FrontPage';
 
 function App() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -18,9 +19,9 @@ function App() {
   return (
     <>
     <div className="App">
-      <h1>Sam Jackson</h1>
 
-      <h3>Making things</h3>
+      <FrontPage />
+
       <div className="project-list">
         {projects.map((project) => (
           <ProjectCard
